@@ -1,10 +1,12 @@
-from fastapi import FastAPI, Depends, HTTPException, Request, Response
+from fastapi import FastAPI, Depends, HTTPException, Request, Response, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
 import models, schemas, database
 import os
+from twilio.rest import Client
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
@@ -26,6 +28,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Email Configuration
+conf = ConnectionConfig(
+    MAIL_USERNAME=os.getenv("EMAIL_USER", ""),
+    MAIL_PASSWORD=os.getenv("EMAIL_PASS", ""),
+    MAIL_FROM=os.getenv("EMAIL_USER", "noreply@portfolio.com"),
+    MAIL_PORT=int(os.getenv("EMAIL_PORT", 587)),
+    MAIL_SERVER=os.getenv("EMAIL_HOST", "smtp.gmail.com"),
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
+)
+
 # Dependency
 def get_db():
     db = database.SessionLocal()
@@ -33,6 +48,60 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def send_sms_notification(name: str, email: str, message: str):
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+    from_phone = os.getenv("TWILIO_PHONE_NUMBER")
+    to_phone = os.getenv("TWILIO_TO_PHONE")
+
+    if not all([account_sid, auth_token, from_phone, to_phone]):
+        # print("⚠️ Twilio credentials missing. SMS not sent.")
+        return
+
+    try:
+        client = Client(account_sid, auth_token)
+        sms_body = f"New Contact!\nFrom: {name}\nEmail: {email}\nMsg: {message}"
+        
+        if len(sms_body) > 1500:
+            sms_body = sms_body[:1500] + "..."
+
+        client.messages.create(
+            body=sms_body,
+            from_=from_phone,
+            to=to_phone
+        )
+        print("✅ SMS sent successfully!")
+    except Exception as e:
+        print(f"❌ Failed to send SMS: {e}")
+
+async def send_email_notification(name: str, email: str, message: str):
+    receiver = os.getenv("RECEIVER_EMAIL")
+    if not receiver or not os.getenv("EMAIL_USER") or not os.getenv("EMAIL_PASS"):
+        # print("⚠️ Email credentials missing. Email not sent.")
+        return
+
+    try:
+        html = f"""
+        <h3>New Contact Form Submission</h3>
+        <p><strong>Name:</strong> {name}</p>
+        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Message:</strong></p>
+        <p>{message}</p>
+        """
+
+        message = MessageSchema(
+            subject=f"Portfolio Contact: {name}",
+            recipients=[receiver],
+            body=html,
+            subtype=MessageType.html
+        )
+
+        fm = FastMail(conf)
+        await fm.send_message(message)
+        print("✅ Email sent successfully!")
+    except Exception as e:
+        print(f"❌ Failed to send Email: {e}")
 
 @app.get("/projects", response_model=List[schemas.Project])
 def read_projects(response: Response, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -42,11 +111,17 @@ def read_projects(response: Response, skip: int = 0, limit: int = 100, db: Sessi
     return projects
 
 @app.post("/contact", response_model=schemas.Message)
-def create_contact(message: schemas.MessageCreate, db: Session = Depends(get_db)):
+async def create_contact(message: schemas.MessageCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    # Save to DB
     db_message = models.Message(**message.dict())
     db.add(db_message)
     db.commit()
     db.refresh(db_message)
+    
+    # Trigger Notifications in background
+    background_tasks.add_task(send_sms_notification, message.name, message.email, message.message)
+    background_tasks.add_task(send_email_notification, message.name, message.email, message.message)
+    
     return db_message
 
 @app.on_event("startup")
