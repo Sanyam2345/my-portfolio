@@ -4,22 +4,10 @@ import { motion } from "framer-motion"
 
 const experiences = [
     {
-        company: "Tech Giant Corp",
-        role: "Senior Full Stack Developer",
-        period: "2022 - Present",
-        description: "Leading a team of developers to build scalable cloud solutions using Next.js and AWS."
-    },
-    {
-        company: "Startup X",
-        role: "Frontend Engineer",
-        period: "2020 - 2022",
-        description: "Developed and maintained the core product dashboard resulting in 200% user growth."
-    },
-    {
-        company: "Freelance",
-        role: "Web Developer",
-        period: "2018 - 2020",
-        description: "Delivered 20+ custom websites for clients across various industries."
+        company: "Cognifyz Technologies",
+        role: "Intern",
+        period: "June 2024 - July 2024 (2 months)",
+        description: "Contributed to robust software solutions, enhancing skills in C++ and Object-Oriented Programming. Collaborated with the team to apply academic knowledge to real-world tech challenges."
     }
 ]
 

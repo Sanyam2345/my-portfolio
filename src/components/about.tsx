@@ -16,12 +16,13 @@ export function About() {
                     About Me
                 </h2>
                 <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                    I am a passionate <span className="text-primary font-semibold">Java Developer</span> containing a strong foundation in software engineering principles.
-                    With a deep love for technology and innovation, I enjoy solving complex problems and building efficient, scalable solutions.
+                    My internship at <span className="text-primary font-semibold">Cognifyz Technologies</span> was a pivotal experience where our team contributed to robust software solutions, enhancing my skills in C++ and Object-Oriented Programming. This role allowed me to apply my academic knowledge from Uttarakhand Technical University, where I study Computer Science, to real-world tech challenges.
                 </p>
                 <p className="text-muted-foreground text-lg leading-relaxed">
-                    Beyond coding, I am a tech enthusiast who loves exploring the latest trends in AI, web development, and cloud computing.
-                    I believe in continuous learning and applying my skills to create impactful digital experiences.
+                    With certifications in both <span className="text-secondary">Python Programming</span> and <span className="text-secondary">Data Structures</span>, my commitment extends to being a dynamic part of a team where collaboration and innovation are at the forefront. The goal is not just personal growth but also contributing to impactful technology projects that resonate with my dedication to the field.
+                </p>
+                <p className="text-muted-foreground text-lg leading-relaxed mt-4">
+                    📍 Based in <strong>Dehradun, Uttarakhand, India</strong>.
                 </p>
             </motion.div>
         </section>

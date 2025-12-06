@@ -28,11 +28,13 @@ export function Education() {
                 >
                     <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-background border-2 border-primary shadow-[0_0_10px_rgba(139,92,246,0.8)]"></div>
 
-                    <h3 className="text-xl font-bold text-foreground">Bachelor of Technology (B.Tech)</h3>
-                    <h4 className="text-lg text-primary mt-1">Computer Science & Engineering</h4>
-                    <p className="text-muted-foreground mt-2">XYZ University | 2019 - 2023</p>
+                    <h3 className="text-xl font-bold text-foreground">Bachelor of Technology - BTech</h3>
+                    <h4 className="text-lg text-primary mt-1">Computer Science</h4>
+                    <p className="text-muted-foreground mt-2">Uttarakhand Technical University | January 2023 - June 2027</p>
                     <p className="text-sm text-muted-foreground mt-2">
-                        Graduated with specialized coursework in Data Structures, Algorithms, and System Design.
+                        Relevant Coursework: Data Structures, Algorithms, Object-Oriented Programming, C++, Python.
+                        <br />
+                        <span className="font-semibold text-primary">Certifications:</span> Learn Java Programming (Beginner to Master), Fundamental of Python Programming, Data Structure.
                     </p>
                 </motion.div>
             </div>

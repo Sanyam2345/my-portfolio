@@ -5,10 +5,10 @@ import { Code2, Database, Globe, Layout, Server, Smartphone, Terminal } from "lu
 import { SkillCard } from "@/components/skill-card"
 
 const skills = [
-    { name: "Frontend", icon: Layout, items: ["React", "Next.js", "Tailwind", "Three.js"] },
-    { name: "Backend", icon: Server, items: ["Node.js", "Express", "PostgreSQL", "Prisma"] },
-    { name: "DevOps", icon: Terminal, items: ["Docker", "AWS", "CI/CD", "Linux"] },
-    { name: "Mobile", icon: Smartphone, items: ["React Native", "Expo", "Swift"] },
+    { name: "Top Skills", icon: Layout, items: ["Tailwind CSS", "CSS", "HTML"] },
+    { name: "Core", icon: Terminal, items: ["Java", "C++", "Python", "DSA", "OOP"] },
+    { name: "Frontend", icon: Globe, items: ["React", "Next.js", "Javascript", "Typescript"] },
+    { name: "Backend", icon: Server, items: ["Node.js", "Express", "PostgreSQL", "SQL"] },
 ]
 
 export function Skills() {

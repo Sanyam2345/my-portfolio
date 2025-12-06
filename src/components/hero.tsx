@@ -42,8 +42,10 @@ export function Hero() {
                         Sanyam Gairola
                     </h1>
                     <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary to-transparent my-2" />
-                    <p className="text-xl sm:text-3xl font-light text-gray-300 dark:text-gray-200 max-w-2xl mx-auto tracking-wide">
-                        Java Developer <span className="text-gray-600 dark:text-gray-500 px-2">//</span> <span className="text-primary font-medium neon-text">Tech Enthusiast</span>
+                    <p className="text-xl sm:text-3xl font-light text-gray-300 dark:text-gray-200 max-w-4xl mx-auto tracking-wide">
+                        Java Developer <span className="text-gray-600 dark:text-gray-500 px-2">//</span> <span className="text-primary font-medium neon-text">Completed Internship @ Cognifyz Technologies (July 2024)</span>
+                        <br className="my-2" />
+                        <span className="text-base sm:text-xl text-muted-foreground mt-2 block">C++ | DSA | OOP | Tech Enthusiast</span>
                     </p>
                 </motion.div>
 

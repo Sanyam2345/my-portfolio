@@ -100,13 +100,13 @@ export function Contact() {
                     <a href="#" className="p-4 rounded-full bg-card border border-border hover:border-primary hover:text-primary hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all">
                         <Github className="w-6 h-6" />
                     </a>
-                    <a href="#" className="p-4 rounded-full bg-card border border-border hover:border-secondary hover:text-secondary hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all">
+                    <a href="https://www.linkedin.com/in/sanyam-gairola-5642282a8" className="p-4 rounded-full bg-card border border-border hover:border-secondary hover:text-secondary hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all">
                         <Linkedin className="w-6 h-6" />
                     </a>
                     <a href="#" className="p-4 rounded-full bg-card border border-border hover:border-accent hover:text-accent hover:shadow-[0_0_20px_rgba(217,70,239,0.3)] transition-all">
                         <Twitter className="w-6 h-6" />
                     </a>
-                    <a href="mailto:hello@example.com" className="p-4 rounded-full bg-card border border-border hover:border-white hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all">
+                    <a href="mailto:sanyamgairola111@gmail.com" className="p-4 rounded-full bg-card border border-border hover:border-white hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all">
                         <Mail className="w-6 h-6" />
                     </a>
                 </div>
