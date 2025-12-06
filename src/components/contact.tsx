@@ -24,12 +24,16 @@ export function Contact() {
                 body: JSON.stringify(formData)
             })
 
-            if (!response.ok) throw new Error("Failed to send message")
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to send message");
+            }
 
             toast.success("Message sent successfully! I'll get back to you soon.")
             setFormData({ name: "", email: "", message: "" })
         } catch (error) {
-            toast.error("Something went wrong. Please try again later.")
+            console.error("Contact Form Error:", error);
+            toast.error("Something went wrong. Please check the console for details.")
         } finally {
             setLoading(false)
         }
