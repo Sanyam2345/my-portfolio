@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from typing import List
 import models, schemas, database
 import os
-from twilio.rest import Client
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
 # Create tables
@@ -49,31 +48,6 @@ def get_db():
     finally:
         db.close()
 
-def send_sms_notification(name: str, email: str, message: str):
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_phone = os.getenv("TWILIO_PHONE_NUMBER")
-    to_phone = os.getenv("TWILIO_TO_PHONE")
-
-    if not all([account_sid, auth_token, from_phone, to_phone]):
-        # print("⚠️ Twilio credentials missing. SMS not sent.")
-        return
-
-    try:
-        client = Client(account_sid, auth_token)
-        sms_body = f"New Contact!\nFrom: {name}\nEmail: {email}\nMsg: {message}"
-        
-        if len(sms_body) > 1500:
-            sms_body = sms_body[:1500] + "..."
-
-        client.messages.create(
-            body=sms_body,
-            from_=from_phone,
-            to=to_phone
-        )
-        print("✅ SMS sent successfully!")
-    except Exception as e:
-        print(f"❌ Failed to send SMS: {e}")
 
 async def send_email_notification(name: str, email: str, message: str):
     receiver = os.getenv("RECEIVER_EMAIL")
@@ -119,7 +93,6 @@ async def create_contact(message: schemas.MessageCreate, background_tasks: Backg
     db.refresh(db_message)
     
     # Trigger Notifications in background
-    background_tasks.add_task(send_sms_notification, message.name, message.email, message.message)
     background_tasks.add_task(send_email_notification, message.name, message.email, message.message)
     
     return db_message

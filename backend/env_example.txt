@@ -1,12 +1,9 @@
 DATABASE_URL="postgresql://portfolio_db_g5ia_user:CJM0T3ECBxaH3rNa8PnhiBn7IDQcOLCk@dpg-d4qa2rali9vc739qh1cg-a/portfolio_db_g5ia"
 FRONTEND_URL="https://my-portfolio-two-omega-20.vercel.app/"
 PYTHON_VERSION=3.11.9
-TWILIO_ACCOUNT_SID="your_account_sid"
-TWILIO_AUTH_TOKEN="your_auth_token"
-TWILIO_PHONE_NUMBER="your_twilio_number"
-TWILIO_TO_PHONE="+919627792563"
+
 EMAIL_HOST="smtp.gmail.com"
 EMAIL_PORT=587
-EMAIL_USER="Sanyam"
-EMAIL_PASS="Sanyam@111"
+EMAIL_USER="sanyamgairola111@gmail.com"
+EMAIL_PASS="xxxx xxxx xxxx xxxx" # Google App Password (16 digits), NOT your login password!
 RECEIVER_EMAIL="sanyamgairola111@gmail.com"
