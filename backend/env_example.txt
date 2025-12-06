@@ -1,0 +1,2 @@
+DATABASE_URL=postgresql://user:password@hostname:port/dbname
+FRONTEND_URL=https://your-portfolio.vercel.app
