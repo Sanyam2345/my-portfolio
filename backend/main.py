@@ -5,10 +5,16 @@ from sqlalchemy.orm import Session
 from typing import List
 import models, schemas, database
 import os
+import httpx
+import logging
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+# --- LOGGING SETUP ---
+# Structured logging is better for production debugging (Render/CloudWatch compatible)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("portfolio_backend")
 
 # Dependency
 def get_db():
@@ -21,7 +27,21 @@ def get_db():
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
 
-app = FastAPI()
+app = FastAPI(
+    title="Portfolio API",
+    description="High-performance backend for portfolio site",
+    version="2.0.0"
+)
+
+# --- MIDDLEWARE OPTIMIZATION ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In strict prod, allow_origins=[os.getenv("FRONTEND_URL")]
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"], # Limit methods for security
+    allow_headers=["*"],
+    max_age=3600, # Cache preflight requests for 1 hour to reduce latency
+)
 
 @app.get("/")
 def read_root():
@@ -29,87 +49,83 @@ def read_root():
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
+    logger.error(f"Global Exception: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"message": "Internal Server Error"},
     )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-
-def send_email_notification(name: str, email: str, message: str):
+# --- ASYNC TELEGRAM NOTIFICATION ---
+async def send_telegram_notification(name: str, email: str, message: str):
     """
-    Sends an email using standard smtplib with STARTTLS.
-    Designed to be robust for Render deployment.
+    Sends a notification to Telegram using Async HTTPX Client.
+    Non-blocking I/O.
     """
-    smtp_host = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    smtp_port = int(os.getenv("EMAIL_PORT", 587))
-    smtp_user = os.getenv("EMAIL_USER")
-    smtp_pass = os.getenv("EMAIL_PASS")
-    receiver_email = os.getenv("RECEIVER_EMAIL")
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
-    if not all([smtp_host, smtp_port, smtp_user, smtp_pass, receiver_email]):
-        print("❌ Error: Missing Render environment variables for email.")
+    if not bot_token or not chat_id:
+        logger.error("Missing Telegram environment variables (TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID)")
         return
 
     try:
-        # Construct Email
-        msg = MIMEMultipart()
-        msg['From'] = f"Portfolio Bot <{smtp_user}>"
-        msg['To'] = receiver_email
-        msg['Subject'] = f"Portfolio Contact: {name}"
-
-        body = f"""
-        <h3>New Contact Form Submission</h3>
-        <p><strong>Name:</strong> {name}</p>
-        <p><strong>Email:</strong> {email}</p>
-        <p><strong>Message:</strong></p>
-        <p>{message}</p>
-        """
-        msg.attach(MIMEText(body, 'html', 'utf-8'))
-
-        # Connect and Send
-        print(f"Connecting to SMTP: {smtp_host}:{smtp_port}...")
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
-            server.set_debuglevel(1) # Show SMTP interaction in Render logs
-            server.starttls()        # Secure the connection
-            server.login(smtp_user, smtp_pass)
-            server.send_message(msg)
+        text = f"🚀 *New Portfolio Contact*\n\n*Name:* {name}\n*Email:* {email}\n*Message:*\n{message}"
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "Markdown"
+        }
         
-        print(f"✅ Email sent successfully to {receiver_email}!")
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, timeout=10.0)
+            
+            if response.status_code == 200:
+                logger.info("✅ Telegram notification sent successfully!")
+            else:
+                logger.warning(f"❌ Failed to send Telegram notification: {response.text}")
 
     except Exception as e:
-        print(f"❌ critical SMTP Error: {str(e)}")
-        traceback.print_exc()
+        logger.error(f"❌ Telegram Error: {str(e)}", exc_info=True)
 
 
 @app.get("/projects", response_model=List[schemas.Project])
 def read_projects(response: Response, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    # Cache for 1 hour
+    """
+    Fetch projects. 
+    SYNC 'def' is OK here because db.query is a blocking synchronous call.
+    FastAPI runs this in a threadpool, preventing blocking of the main loop.
+    """
+    # Cache for 1 hour (Client-side)
     response.headers["Cache-Control"] = "public, max-age=3600"
+    
+    # Simple query, usually fast.
     projects = db.query(models.Project).offset(skip).limit(limit).all()
     return projects
 
 @app.post("/contact", response_model=schemas.Message)
-async def create_contact(message: schemas.MessageCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    # Save to DB
-    db_message = models.Message(**message.dict())
-    db.add(db_message)
-    db.commit()
-    db.refresh(db_message)
-    
-    # Trigger Notifications in background
-    background_tasks.add_task(send_email_notification, message.name, message.email, message.message)
-    
-    return db_message
+def create_contact(message: schemas.MessageCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """
+    Handle contact form submissions.
+    OPTIMIZATION: Changed to 'def' (SYNC) because SQLAlchemy 'db.add/commit' are blocking.
+    Running as sync lets FastAPI put this in a worker thread, keeping the async loop free.
+    """
+    try:
+        # Save to DB (Blocking I/O -> Threadpool)
+        db_message = models.Message(**message.dict())
+        db.add(db_message)
+        db.commit()
+        db.refresh(db_message)
+        
+        # Trigger Notification (Async -> Event Loop)
+        # BackgroundTasks can gracefully handle async functions even from sync endpoints
+        background_tasks.add_task(send_telegram_notification, message.name, message.email, message.message)
+        
+        return db_message
+    except Exception as e:
+        logger.error(f"Error saving contact: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not save message")
 
 @app.on_event("startup")
 def startup_event():
-    pass
+    logger.info("Application Startup: performing checks...")

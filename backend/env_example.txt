@@ -2,9 +2,6 @@ DATABASE_URL="postgresql://portfolio_db_g5ia_user:CJM0T3ECBxaH3rNa8PnhiBn7IDQcOL
 FRONTEND_URL="https://my-portfolio-two-omega-20.vercel.app/"
 PYTHON_VERSION=3.11.9
 
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=mygmail@gmail.com
-EMAIL_PASS=my_google_app_password
-RECEIVER_EMAIL=sanyamgairola111@gmail.com
+TELEGRAM_BOT_TOKEN="your_bot_token_here"
+TELEGRAM_CHAT_ID="your_chat_id_here"
 FRONTEND_URL=<leave as is if used>

@@ -6,26 +6,31 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Internal Render URL (Reference): postgresql://portfolio_db_g5ia_user:CJM0T3ECBxaH3rNa8PnhiBn7IDQcOLCk@dpg-d4qa2rali9vc739qh1cg-a/portfolio_db_g5ia
-# Check if we are running on Render
-if os.getenv("RENDER"):
-    # Output for debugging (remove in strict prod if needed)
+# --- CONNECTION POOLING OPTIMIZATION ---
+# Render/Cloud Postgres often drops idle connections. 'pool_pre_ping=True' fixes this.
+# 'pool_size' and 'max_overflow' limit connections to avoid mistakes.
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if os.getenv("RENDER") and DATABASE_URL:
     print("Running in Production Mode (Render)")
-    SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+    # Render (Postgres)
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,  # Critical for production stability
+        pool_size=10,        # Standard tier limit is usually 20-50, keep it safe
+        max_overflow=10,     # Allow burst
+        pool_recycle=1800    # Recycle connections every 30 mins
+    )
 else:
     print("Running in Local Mode (SQLite)")
+    # Local (SQLite)
     SQLALCHEMY_DATABASE_URL = "sqlite:///./portfolio.db"
-
-if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
-else:
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL, 
-        pool_pre_ping=True, 
-        pool_recycle=3600
+        connect_args={"check_same_thread": False} # Needed for SQLite
     )
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
