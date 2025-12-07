@@ -23,6 +23,10 @@ models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"status": "online", "message": "Portfolio API is running smoothly"}
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     return JSONResponse(
