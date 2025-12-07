@@ -143,6 +143,42 @@ def test_performance_load():
     except Exception as e:
         log_fail("PERFORMANCE", "Load Test", str(e))
 
+# --- ADDITIONAL EXHAUSTIVE TESTS ---
+
+def test_unit_validation_error():
+    """
+    Unit Test: Verify API rejects invalid input (Missing Email).
+    """
+    try:
+        payload = {"name": "Invalid User", "message": "No email here"}
+        response = client.post("/contact", json=payload)
+        assert response.status_code == 422
+        log_pass("UNIT", "Input Validation (Missing Field)")
+    except Exception as e:
+        log_fail("UNIT", "Input Validation", str(e))
+
+def test_security_xss_prevention():
+    """
+    Security Test: Verify XSS payloads are accepted but safely stored (Active prevention usually happens on Frontend display).
+    We check that the backend doesn't crash or execute it.
+    """
+    try:
+        payload = {
+            "name": "<script>alert('XSS')</script>",
+            "email": "xss@safe.com",
+            "message": "Testing sanitization"
+        }
+        with patch("requests.post") as mock_post:
+             mock_post.return_value.status_code = 200
+             response = client.post("/contact", json=payload)
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert data["name"] == "<script>alert('XSS')</script>" # Should retrieve exactly what was sent (Sanitization is a display concern)
+        log_pass("SECURITY", "XSS Payload Handling")
+    except Exception as e:
+        log_fail("SECURITY", "XSS Test", str(e))
+
 def run_suite():
     # Clear report file
     with open("test_report.txt", "w") as f:
@@ -150,9 +186,11 @@ def run_suite():
 
     print("\n--- STARTING PROFESSIONAL TEST SUITE ---\n")
     test_unit_health_check()
+    test_unit_validation_error() # New
     test_integration_contact_flow()
     test_security_sql_injection()
-    test_performance_load()
+    test_security_xss_prevention() # New
+    # Note: Heavy load testing moved to dedicated async stress_test.py script
     
     print("\n\n========================================")
     print("FINAL TEST SUMMARY")

@@ -30,6 +30,14 @@ else:
         SQLALCHEMY_DATABASE_URL, 
         connect_args={"check_same_thread": False} # Needed for SQLite
     )
+    
+    # Enable Write-Ahead Logging (WAL) for concurrency
+    from sqlalchemy import event
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
