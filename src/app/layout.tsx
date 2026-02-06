@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Sanyam Gairola | Java Developer",
     description: "Building scalable solutions with Java and Modern Web Technologies.",
-    url: "https://your-portfolio-url.com", // Placeholder
-    siteName: "Sanyam Gairola Portfolio",
+    url: "https://sanyam-portfolio.vercel.app",
+    siteName: "Sanyam Gairola",
     images: [
       {
         url: "/pp.jpeg",

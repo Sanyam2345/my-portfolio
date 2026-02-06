@@ -6,11 +6,11 @@ import { type LucideIcon } from "lucide-react"
 interface SkillCardProps {
     name: string
     icon: LucideIcon
-    items: string[]
+    description?: string // Optional short text to add more context if needed
     index: number
 }
 
-export function SkillCard({ name, icon: Icon, items, index }: SkillCardProps) {
+export function SkillCard({ name, icon: Icon, index }: SkillCardProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -18,22 +18,19 @@ export function SkillCard({ name, icon: Icon, items, index }: SkillCardProps) {
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ delay: index * 0.1, duration: 0.5 }}
             viewport={{ once: true }}
-            className="p-6 rounded-2xl bg-card/40 border border-primary/20 backdrop-blur-md hover:border-primary hover:bg-card/60 hover:shadow-[0_0_40px_rgba(139,92,246,0.2)] transition-all group relative overflow-hidden"
+            className="group relative p-6 rounded-2xl bg-card border border-primary/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col justify-between overflow-hidden hover:shadow-[0_0_30px_rgba(139,92,246,0.15)]"
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
-                <Icon className="w-6 h-6 text-primary group-hover:text-white transition-colors" />
+            <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                    <Icon className="w-8 h-8 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
+                </div>
+                <h3 className="text-lg font-bold group-hover:text-primary transition-colors">{name}</h3>
             </div>
-            <h3 className="text-xl font-bold mb-4">{name}</h3>
-            <ul className="space-y-2 relative z-10">
-                {items.map((item) => (
-                    <li key={item} className="flex items-center text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors">
-                        <span className="w-1.5 h-1.5 rounded-full bg-secondary mr-2 shadow-[0_0_5px_rgba(6,182,212,0.8)] group-hover:shadow-[0_0_10px_rgba(6,182,212,1)] transition-all"></span>
-                        {item}
-                    </li>
-                ))}
-            </ul>
+
+            {/* Decorative small element */}
+            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-all" />
         </motion.div>
     )
 }

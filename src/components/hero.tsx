@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic"
 import Image from "next/image"
+import Link from "next/link"
 import { motion } from "framer-motion"
 
 const CanvasBackground = dynamic(() => import("@/components/canvas-background").then(mod => mod.CanvasBackground), {
@@ -55,18 +56,18 @@ export function Hero() {
                     transition={{ delay: 0.8, duration: 0.8 }}
                     className="flex gap-4 mt-8"
                 >
-                    <a
+                    <Link
                         href="#projects"
                         className="px-8 py-4 rounded-full bg-primary text-white font-bold tracking-wide shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:shadow-[0_0_40px_rgba(139,92,246,0.7)] hover:scale-105 transition-all duration-300"
                     >
                         View Work
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         href="#contact"
                         className="px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 hover:border-white/20 transition-all duration-300 backdrop-blur-sm"
                     >
                         Contact Me
-                    </a>
+                    </Link>
                 </motion.div>
             </div>
 
