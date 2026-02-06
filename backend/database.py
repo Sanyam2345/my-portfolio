@@ -12,7 +12,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if os.getenv("RENDER") and DATABASE_URL:
+if DATABASE_URL:
     print("Running in Production Mode (Render)")
     # Render (Postgres)
     engine = create_engine(
